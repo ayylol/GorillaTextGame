@@ -414,6 +414,7 @@ int main()
         {
             if (g.ongoing == 0)
             {
+                srand(clock());
                 g.ini();
                 time = clock();
             }
