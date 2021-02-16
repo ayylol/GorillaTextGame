@@ -97,7 +97,6 @@ public:
     }
     void nextMove(string &gameBoard, int rowSize)
     {
-        //cout << "in next move " << row << " " << col<< "\n";
         bool notDone = true;
         int move;
         int tR;
@@ -105,41 +104,34 @@ public:
         int counter = 0;
         while (notDone && counter < 5)
         {
-            //cout << "moveLoop ";
             //get the postion of the move
             if (moves[current] == 0)
             {
-                //cout << "down ";
                 tR = row + 1;
                 tC = col;
                 move = ((rowSize + 1) * (row + 1) + col);
             }
             else if (moves[current] == 1)
             {
-                //cout << "right ";
                 tR = row;
                 tC = col + 1;
                 move = ((rowSize + 1) * row + (col + 1));
             }
             else if (moves[current] == 2)
             {
-                //cout << "up ";
                 tR = row - 1;
                 tC = col;
                 move = ((rowSize + 1) * (row - 1) + col);
             }
             else if (moves[current] == 3)
             {
-                //cout << "left ";
                 tR = row;
                 tC = col - 1;
                 move = ((rowSize + 1) * row + (col - 1));
             }
-            //cout << "moveChecked "<< move << " ";
             //If the move is to an empty slot do nothing otherwise get another moveset and try again
             if (gameBoard[move] == ' ')
             {
-                //cout << "Moving\n";
                 gameBoard[move] = symbol;
                 gameBoard[((rowSize + 1) * row + col)] = ' ';
                 row = tR;
@@ -209,9 +201,7 @@ public:
                 else
                     aggr = false;
                 npc temp(aggr, row, col, gameBoard[i]);
-                //cout << temp.symbol << '\n';
-                bots.push_back(temp); ///////////THIS LINE
-                //cout << bots.back().symbol << "\n\n";
+                bots.push_back(temp);
             }
             //changing row and column
             if (gameBoard[i] == '\n')
@@ -233,7 +223,6 @@ public:
         int cC = pCol - 1;
         int pos;
         //loop through cells surrounding player see if one is a zookeeper, or exit
-        //cout << "in Check\n";
         for (int i = rC; i <= pRow + 1; i++)
         {
             for (int j = cC; j <= pCol + 1; j++)
@@ -241,39 +230,31 @@ public:
                 pos = ((rowSize + 1) * i + j);
                 if (gameBoard[pos] == 'Z')
                 {
-                    //cout << "returning Check 2\n";
                     return 2;
                 }
                 else if (gameBoard[pos] == 'z' || gameBoard[pos] == 'o')
                 {
-                    //cout << "returning Check 3\n";
                     return 3;
                 }
             }
         }
-        //cout << "returning Check 1\n";
         return 1; //game is ongoing
     }
     int act(char &c)
     {
         if (c == 'p')
         {
-            //cout << "Pausing Game\n";
             c = '`';
             return 0; //pausing game
         }
         else
         { //game continuing
-            //cout << "performing next moves\n";
             if (time(0) % 2 == 0)
             {
                 for (int i = 0; i < bots.size(); i++)
                 {
-                    //cout << i << "\n";
                     bots[i].nextMove(gameBoard, rowSize);
-                    //cout << i << "\n\n";
                 }
-                //cout << "performed next moves\n";
             }
             return check();
         }
@@ -320,7 +301,12 @@ int main()
                 g.ini();
             else
             {
-                cout << string(100, '\n') + g.printScreen();
+                toPrint = g.printScreen();
+                if (oldPrint.compare(toPrint) != 0)
+                {
+                    cout << string(100, '\n') << toPrint;
+                    oldPrint = toPrint;
+                }
                 //cout << g.printScreen();
                 //cout << "About to act\n";
                 status = g.act(key);
