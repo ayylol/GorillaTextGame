@@ -102,7 +102,7 @@ public:
         aggresive = a;
         symbol = s;
         sight = si;
-        focus=f;
+        focus = f;
         row = r;
         col = c;
         newMoves();
@@ -113,8 +113,8 @@ public:
         {
             int hDiff = col - pCol;
             int vDiff = row - pRow;
-            int follow = rand()%100;
-            if ((follow>focus)&&(((hDiff >= -sight) && (hDiff <= 0)) || ((hDiff >= 0) && (hDiff <= sight))) &&
+            int follow = rand() % 100;
+            if ((follow > focus) && (((hDiff >= -sight) && (hDiff <= 0)) || ((hDiff >= 0) && (hDiff <= sight))) &&
                 (((vDiff >= -sight) && (vDiff <= 0)) || ((vDiff >= 0) && (vDiff <= sight))))
             { //checks if npc is within range
                 int vertOrHori;
@@ -252,16 +252,16 @@ public:
                 if (gameBoard[i] == 'Z')
                 {
                     aggr = true;
-                    focus=rand()%55+5;
+                    focus = rand() % 55 + 5;
                     sight = (rand() % 10) + 5;
                 }
                 else
                 {
                     aggr = false;
                     sight = 0;
-                    focus=0;
+                    focus = 0;
                 }
-                npc temp(aggr, row, col, gameBoard[i], sight,focus);
+                npc temp(aggr, row, col, gameBoard[i], sight, focus);
                 bots.push_back(temp);
             }
             //changing row and column
