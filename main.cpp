@@ -53,7 +53,10 @@ public:
         else if (key == 'p')
         {
             key = '`';
-            return current + 1;
+            if (current == 0)
+                return 1;
+            else
+                return 4;
         }
         return 0;
     }
@@ -80,10 +83,13 @@ class npc
 private:
     int current = 0;
     int moves[3];
+    bool aggresive;
+    int sight;
+    int focus;
     void newMoves()
     {
         for (int i = 0; i < 3; i++)
-            moves[i] = rand() % 4;
+            moves[i] = rand() % 4; //0=down, 1=right, 2=up, 3=left
         current = 0;
     }
 
@@ -91,15 +97,57 @@ public:
     int row;
     int col;
     char symbol;
-    npc(bool aggressive, int r, int c, char s)
+    npc(bool a, int r, int c, char s, int si, int f)
     {
+        aggresive = a;
         symbol = s;
+        sight = si;
+        focus=f;
         row = r;
         col = c;
         newMoves();
     }
-    void nextMove(string &gameBoard, int rowSize)
+    void nextMove(string &gameBoard, int rowSize, int pRow, int pCol)
     {
+        if (aggresive)
+        {
+            int hDiff = col - pCol;
+            int vDiff = row - pRow;
+            int follow = rand()%100;
+            if ((follow>focus)&&(((hDiff >= -sight) && (hDiff <= 0)) || ((hDiff >= 0) && (hDiff <= sight))) &&
+                (((vDiff >= -sight) && (vDiff <= 0)) || ((vDiff >= 0) && (vDiff <= sight))))
+            { //checks if npc is within range
+                int vertOrHori;
+                if (vDiff == 0)
+                    vertOrHori = 1;
+                else if (hDiff == 0)
+                    vertOrHori = 0;
+                else
+                    vertOrHori = rand() % 2;
+                if (vertOrHori == 0)
+                { //move closer vertically
+                    if (vDiff > 0)
+                    { //go down
+                        moves[current] = 2;
+                    }
+                    else
+                    { //go up
+                        moves[current] = 0;
+                    }
+                }
+                else
+                { //move closer horizontally
+                    if (hDiff > 0)
+                    { //go right
+                        moves[current] = 3;
+                    }
+                    else
+                    { //go left
+                        moves[current] = 1;
+                    }
+                }
+            }
+        }
         bool notDone = true;
         int move;
         int tR;
@@ -187,6 +235,8 @@ public:
 
         //Initializing npcs
         bool aggr;
+        int sight;
+        int focus;
         int row = 0;
         int col = 0;
 
@@ -200,10 +250,18 @@ public:
             else if (gameBoard[i] != ' ' && gameBoard[i] != '\n' && gameBoard[i] != '#' && gameBoard[i] != 'z' && gameBoard[i] != 'o')
             { //initialize an npc if they are not one of these characters
                 if (gameBoard[i] == 'Z')
+                {
                     aggr = true;
+                    focus=rand()%55+5;
+                    sight = (rand() % 10) + 5;
+                }
                 else
+                {
                     aggr = false;
-                npc temp(aggr, row, col, gameBoard[i]);
+                    sight = 0;
+                    focus=0;
+                }
+                npc temp(aggr, row, col, gameBoard[i], sight,focus);
                 bots.push_back(temp);
             }
             //changing row and column
@@ -307,7 +365,7 @@ public:
             {
                 for (int i = 0; i < bots.size(); i++)
                 {
-                    bots[i].nextMove(gameBoard, rowSize);
+                    bots[i].nextMove(gameBoard, rowSize, pRow, pCol);
                 }
             }
             return check();
@@ -365,6 +423,7 @@ int main()
                 if (oldPrint.compare(toPrint) != 0)
                 {
                     cout << string(100, '\n') << toPrint;
+                    //cout << toPrint;
                     oldPrint = toPrint;
                 }
                 cTime = clock() - time;
@@ -383,21 +442,24 @@ int main()
         }
         else if (status > 1)
         {
-            string fName;
-            if (status == 3)
-                fName = "Winner";
-            else
-                fName = "GameOver";
-            //from https://www.tutorialspoint.com/Read-whole-ASCII-file-into-Cplusplus-std-string
-            ifstream f(fName);
-            if (f)
+            if (status < 4)
             {
-                ostringstream ss;
-                ss << f.rdbuf();
-                toPrint = ss.str();
+                string fName;
+                if (status == 3)
+                    fName = "Winner";
+                else if (status == 2)
+                    fName = "GameOver";
+                //from https://www.tutorialspoint.com/Read-whole-ASCII-file-into-Cplusplus-std-string
+                ifstream f(fName);
+                if (f)
+                {
+                    ostringstream ss;
+                    ss << f.rdbuf();
+                    toPrint = ss.str();
+                }
+                //////////////////////////////////////////////////////////////////
+                cout << string(100, '\n') << toPrint;
             }
-            //////////////////////////////////////////////////////////////////
-            cout << string(100, '\n') << toPrint;
             break;
         }
     }
