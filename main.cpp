@@ -7,8 +7,11 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
+
 class Menu
 {
 private:
@@ -240,7 +243,7 @@ public:
         }
         return 1; //game is ongoing
     }
-    int act(char &c)
+    int act(char &c, bool botsMove)
     {
         if (c == 'p')
         {
@@ -249,7 +252,58 @@ public:
         }
         else
         { //game continuing
-            if (time(0) % 2 == 0)
+            int prevPos = ((rowSize + 1) * pRow + pCol);
+            int pos;
+            bool playerMoved;
+            if (c == 'w')
+            {
+                pos = ((rowSize + 1) * (pRow - 1) + pCol);
+                if (gameBoard[pos] == ' ')
+                {
+                    gameBoard[prevPos] = ' ';
+                    gameBoard[pos] = 'M';
+                    pRow--;
+                    playerMoved = true;
+                }
+                c = '`';
+            }
+            else if (c == 'a')
+            {
+                pos = ((rowSize + 1) * pRow + (pCol - 1));
+                if (gameBoard[pos] == ' ')
+                {
+                    gameBoard[prevPos] = ' ';
+                    gameBoard[pos] = 'M';
+                    pCol--;
+                    playerMoved = true;
+                }
+                c = '`';
+            }
+            else if (c == 's')
+            {
+                pos = ((rowSize + 1) * (pRow + 1) + pCol);
+                if (gameBoard[pos] == ' ')
+                {
+                    gameBoard[prevPos] = ' ';
+                    gameBoard[pos] = 'M';
+                    pRow++;
+                    playerMoved = true;
+                }
+                c = '`';
+            }
+            else if (c == 'd')
+            {
+                pos = ((rowSize + 1) * pRow + (pCol + 1));
+                if (gameBoard[pos] == ' ')
+                {
+                    gameBoard[prevPos] = ' ';
+                    gameBoard[pos] = 'M';
+                    pCol++;
+                    playerMoved = true;
+                }
+                c = '`';
+            }
+            if (botsMove || playerMoved)
             {
                 for (int i = 0; i < bots.size(); i++)
                 {
@@ -273,6 +327,9 @@ int main()
     int status = 0; //status codes: 0=menu 1=game 2=lost 3=won
     string oldPrint = "";
     string toPrint = "";
+    clock_t time;
+    clock_t cTime;
+    int ms;
     while (true)
     {
         //from https://stackoverflow.com/questions/20349585/c-library-function-to-check-the-keypress-from-keyboard-in-linux
@@ -298,7 +355,10 @@ int main()
         else if (status == 1)
         {
             if (g.ongoing == 0)
+            {
                 g.ini();
+                time = clock();
+            }
             else
             {
                 toPrint = g.printScreen();
@@ -307,14 +367,39 @@ int main()
                     cout << string(100, '\n') << toPrint;
                     oldPrint = toPrint;
                 }
-                //cout << g.printScreen();
-                //cout << "About to act\n";
-                status = g.act(key);
-                //cout << "Acted\n";
+                cTime = clock() - time;
+                ms = cTime / CLOCKS_PER_SEC * 1000;
+                //cout << ms;
+                if (ms >= 5)
+                {
+                    status = g.act(key, true);
+                    time = clock();
+                }
+                else
+                {
+                    status = g.act(key, false);
+                }
             }
         }
-        else
+        else if (status > 1)
+        {
+            string fName;
+            if (status == 3)
+                fName = "Winner";
+            else
+                fName = "GameOver";
+            //from https://www.tutorialspoint.com/Read-whole-ASCII-file-into-Cplusplus-std-string
+            ifstream f(fName);
+            if (f)
+            {
+                ostringstream ss;
+                ss << f.rdbuf();
+                toPrint = ss.str();
+            }
+            //////////////////////////////////////////////////////////////////
+            cout << string(100, '\n') << toPrint;
             break;
+        }
     }
     return 0;
 }
