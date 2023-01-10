@@ -18,3 +18,5 @@ The Mechanics
 * The Zookeepers (Z) are on the lookout for you, and will try to catch you if they spot you
 * The zoo also has guests (g) and other animals (s,L,O,k,G)
 * get to the zoo entrance (zoo) to escape the zoo and win!
+
+Testing
